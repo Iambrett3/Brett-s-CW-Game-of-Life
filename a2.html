@@ -13,15 +13,21 @@
       <button id="clear-button" type="button" autocomplete="off">Clear</button>
       <button id="random-button" type="button" autocomplete="off">Fill Grid Randomly</button>
       <input type="range" id="time-slider" autocomplete="off">
-      <input type="text" id="time-slider-val" readonly autocomplete="off">
+      <span class="top-text">speed (ms):</span><input type="text" id="time-slider-val" readonly autocomplete="off">
       <button id="step-button" type="button" disabled autocomplete="off">Step</button>
-      <span class="top-text">width:</span> <input type="text" id="x-size-input" autocomplete="off">
-      <span class="top-text">height: </span> <input type="text" id="y-size-input" autocomplete="off">
+      <span class="top-text">size:</span> <input type="text" id="size-input" autocomplete="off">
+      <span class="top-text">boundary behavior:</span>
       <select id="border-behavior-select" autocomplete="off">
-        <option value="alive"> Alive </option>
+        <option value="alive">  Alive </option>
         <option value="dead"> Dead </option>
         <option value="toroidal" selected> Toroidal </option>
       </select>
+      <span class="top-text">r:</span> <input type="text" id="r-input" autocomplete="off">
+      <span class="top-text">l:</span> <input type="text" id="l-input" autocomplete="off">
+      <span class="top-text">o:</span> <input type="text" id="o-input" autocomplete="off">
+      <span class="top-text">Gmin:</span> <input type="text" id="gmin-input" autocomplete="off">
+      <span class="top-text">Gmax:</span> <input type="text" id="gmax-input" autocomplete="off">
+      
     </div>
 
     <div id="bottom-div">

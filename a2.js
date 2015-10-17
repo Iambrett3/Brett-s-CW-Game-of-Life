@@ -1,6 +1,7 @@
 
-var CURRENT_WIDTH = 20;
-var CURRENT_HEIGHT = 20;
+var CURRENT_SIZE = 50;
+var MAX_SIZE = 200;
+var MIN_SIZE = 20;
 var CURRENT_STEP_TIME = 300;
 var MAX_STEP_TIME = 1000;
 var MIN_STEP_TIME = 0;
@@ -8,11 +9,16 @@ var currentState = [];
 var currentlyRunning = true; //boolean indicating whether animation is running
 var intervalId;
 var currentBorderBehavior = "toroidal";
+var currentR = 1;
+var currentL = 2;
+var currentO = 3
+var currentGmin = 3;
+var currentGmax = 3;
 
 $(document).ready(function() {
    initClicks();
    initInputs();
-   buildGrid(CURRENT_WIDTH, CURRENT_HEIGHT);
+   buildGrid(CURRENT_SIZE);
 
    randomlyFillGrid();
    startAnimation();
@@ -24,7 +30,7 @@ function startAnimation() {
 
 function clearGrid() {
 	currentState = [];
-	buildGrid(CURRENT_WIDTH, CURRENT_HEIGHT);
+	buildGrid(CURRENT_SIZE);
 }
 
 function initInputs() {
@@ -45,18 +51,138 @@ function initInputs() {
 		currentBorderBehavior = $(this).val();
 	});
 
-	$('#x-size-input').val(CURRENT_WIDTH);
-	$('#y-size-input').val(CURRENT_HEIGHT);
+	$('#r-input').val(currentR);
+	$('#l-input').val(currentL);
+	$('#o-input').val(currentO);
+	$('#gmin-input').val(currentGmin);
+	$('#gmax-input').val(currentGmax);
 
-	$('#x-size-input').on('change', function() {
-		var newXValue = $(this).val();
-		CURRENT_WIDTH = parseInt(newXValue);
-		clearGrid();
+	$('#r-input').on('change', function() {
+		var input = parseInt($(this).val());
+		var newValue;
+
+		if (isNaN(input)) {
+			$(this).val(currentR);
+			return;
+		}
+		else if (input < 1) {
+			newValue = 1;
+		}
+		else if (input > 10) {
+			newValue = 10;
+		}
+		else {
+			newValue = input;
+		}
+		$(this).val(newValue);
+	    currentR = newValue;
 	});
 
-	$('#y-size-input').on('change', function() {
-		var newYValue = $(this).val();
-		CURRENT_HEIGHT = parseInt(newYValue);
+	$('#l-input').on('change', function() {
+		var input = parseInt($(this).val());
+		var newValue;
+
+		if (isNaN(input)) {
+			$(this).val(currentL);
+			return;
+		}
+		else if (input < 1) {
+			newValue = 1;
+		}
+		else if (input > currentO) {
+			newValue = currentO;
+		}
+		else {
+			newValue = input;
+		}
+		$(this).val(newValue);
+		currentL = newValue;
+	});
+
+	$('#o-input').on('change', function() {
+		var input = parseInt($(this).val());
+		var newValue;
+
+		if (isNaN(input)) {
+			$(this).val(currentO);
+			return;
+		}
+		else if (input < currentL) {
+			newValue = currentL;
+		}
+		else if (input >= (4*currentR*currentR + 4*currentR)) {
+			newValue = (4*currentR*currentR + 4*currentR) - 1;
+		}
+		else {
+			newValue = input;
+		}
+
+		$(this).val(newValue);
+		currentO = newValue;
+	});
+
+	$('#gmin-input').on('change', function() {
+		var input = parseInt($(this).val());
+		var newValue;
+
+		if (isNaN(input)) {
+			$(this).val(currentGmin);
+			return;
+		}
+		else if (input < 1) {
+			newValue = 1;
+		}
+		else if (input > currentGmax) {
+			newValue = currentGmax;
+		}
+		else {
+			newValue = input;
+		}
+
+		$(this).val(newValue);
+		currentGmin = newValue;
+	});
+
+	$('#gmax-input').on('change', function() {
+		var input = parseInt($(this).val());
+		var newValue;
+
+		if (isNaN(input)) {
+			$(this).val(currentGmax);
+			return;
+		}
+		else if (input < currentGmin) {
+			newValue = currentGmin;
+		}
+		else if (input >= (4*currentR*currentR + 4*currentR)) {
+			newValue = (4*currentR*currentR + 4*currentR) - 1;
+		}
+		else {
+			newValue = input;
+		}
+
+		$(this).val(newValue);
+		currentGmax = newValue;
+	});
+
+	$('#size-input').val(CURRENT_SIZE);
+
+	$('#size-input').on('change', function() {
+		var newSize = parseInt($(this).val());
+
+		if (isNaN(newSize)) {
+			$(this).val(CURRENT_SIZE);
+			return;
+		}
+		else if (newSize < MIN_SIZE) {
+			newSize = MIN_SIZE;
+		}
+		else if (newSize > MAX_SIZE) {
+			newSize = MAX_SIZE;
+		}
+
+		$(this).val(newSize);
+		CURRENT_SIZE = newSize;
 		clearGrid();
 	});
 
@@ -111,10 +237,10 @@ return ((this%n)+n)%n;
 
 function step() {
 	var nextState = [];
-		for (var i = 0; i < CURRENT_HEIGHT; i++) {
+		for (var i = 0; i < CURRENT_SIZE; i++) {
 
 			var thisRow = [];
-			for (var j = 0; j < CURRENT_WIDTH; j++) {
+			for (var j = 0; j < CURRENT_SIZE; j++) {
 				var numSurrounding = getNumAliveSurroundingSquare(j, i);
 				var thisSquare = $('#'+i+'-'+j);
 				thisRow.push(getNextState(thisSquare, numSurrounding));
@@ -141,18 +267,18 @@ function repaintGrid(state) {
 
 function getNextState(square, numSurrounding) {
 	if (square.hasClass('alive')) {
-		if (numSurrounding <= 1) {
+		if (numSurrounding < currentL) {
 			return 0;
 		}
-		if (numSurrounding <= 3) {
+		else if (numSurrounding > currentO) {
+			return 0;
+		}
+		else {
 			return 1;
-		}
-		if (numSurrounding >= 4) {
-			return 0;
 		}
 	}
 	else {
-		if (numSurrounding == 3) {
+		if (numSurrounding >= currentGmin && numSurrounding <= currentGmax) {
 			return 1;
 		}
 		else {
@@ -162,81 +288,38 @@ function getNextState(square, numSurrounding) {
 }
 
 function getNumAliveSurroundingSquare(x, y) {
-	var surrSquares = [];
-	var numOutsideBorder; 
 	var numAlive = 0;
+	var xMinBound = x-currentR;
+	var xMaxBound = x+currentR;
+	var yMinBound = y-currentR;
+	var yMaxBound = y+currentR;
 
-	if (currentBorderBehavior == "toroidal") {
-		surrSquares.push(currentState[(y-1).mod(CURRENT_HEIGHT)][(x-1).mod(CURRENT_WIDTH)]); //topLeft
-		surrSquares.push(currentState[(y-1).mod(CURRENT_HEIGHT)][(x).mod(CURRENT_WIDTH)]); //top
-		surrSquares.push(currentState[(y-1).mod(CURRENT_HEIGHT)][(x+1).mod(CURRENT_WIDTH)]); //topRight
-		surrSquares.push(currentState[(y).mod(CURRENT_HEIGHT)][(x+1).mod(CURRENT_WIDTH)]); //right
-		surrSquares.push(currentState[(y+1).mod(CURRENT_HEIGHT)][(x+1).mod(CURRENT_WIDTH)]); //bottomRight
-		surrSquares.push(currentState[(y+1).mod(CURRENT_HEIGHT)][(x).mod(CURRENT_WIDTH)]); //bottom
-		surrSquares.push(currentState[(y+1).mod(CURRENT_HEIGHT)][(x-1).mod(CURRENT_WIDTH)]); //bottomLeft
-		surrSquares.push(currentState[(y).mod(CURRENT_HEIGHT)][(x-1).mod(CURRENT_WIDTH)]); //left
-	
-
-	}
-	else {
-		if (currentBorderBehavior == "alive") {
-			//calculate the number outside the border
-			if (x == 0 || x == (CURRENT_WIDTH-1)) {
-				if (y == 0 || y == (CURRENT_HEIGHT-1)) {
-					numOutsideBorder = 5;
-				}
-				else {
-					numOutsideBorder = 3;
-				}
+	for (var i = yMinBound; i <= yMaxBound; i++) {
+		for (var j = xMinBound; j <= xMaxBound; j++) {
+			//alert(i + ', ' + j + 'and current boundaries are ' + yMinBound+', '+yMaxBound+':'+xMinBound+', '+ xMaxBound);
+			if (i == y && j == x) {
+				continue;
 			}
-			else if (y == 0 || y == (CURRENT_HEIGHT-1)) {
-				numOutsideBorder = 3;
+			if (currentBorderBehavior == "toroidal") {
+				if (currentState[i.mod(CURRENT_SIZE)] && currentState[i.mod(CURRENT_SIZE)][j.mod(CURRENT_SIZE)]) {
+					numAlive++;
+				}
 			}
 			else {
-				numOutsideBorder = 0;
-			}
-				numAlive += numOutsideBorder;
-		}
-
-		//add the ones inside the border normally, checking to make sure it exists.
-		if (x != 0) {
-			surrSquares.push(currentState[y][x-1]); //left
-			if (y != 0) {
-				surrSquares.push(currentState[y-1][x-1]); //topLeft
-			}
-			if (y != (CURRENT_HEIGHT-1)) {
-				surrSquares.push(currentState[y+1][x-1]); //bottomLeft
+				if (currentState[i] && typeof currentState[i][j] !== 'undefined') {
+					if (currentState[i][j]) {
+						numAlive++;
+					}
+				}
+				else {
+					if (currentBorderBehavior == "alive") {
+						numAlive++;
+					}
+				}
 			}
 
-		}
-		if (x != (CURRENT_WIDTH-1)) {
-			if (y != 0) {
-				surrSquares.push(currentState[y-1][x+1]); //topRight
-			}
-			if (y != (CURRENT_HEIGHT-1)) {
-				surrSquares.push(currentState[y+1][x+1]); //bottomRight
-			}
-
-			surrSquares.push(currentState[y][x+1]); //right
-
-		}
-		if (y != 0) {
-			surrSquares.push(currentState[y-1][x]); //top
-		}
-		if (y != (CURRENT_WIDTH-1)) {
-			surrSquares.push(currentState[y+1][x]); //bottom
-		}		
-	}
-
-	for (var i = 0; i < surrSquares.length; i++) {
-		var square = surrSquares[i];
-
-		if (square) {
-			numAlive++;
 		}
 	}
-
-
 	return numAlive;
 }
 
@@ -284,8 +367,8 @@ function randomlyFillGrid() {
 
 function printCurrentState() {
 	var str = "";
-	for(var i = 0; i < CURRENT_HEIGHT; i++) {
-    	for(var z = 0; z < CURRENT_WIDTH; z++) {
+	for(var i = 0; i < CURRENT_SIZE; i++) {
+    	for(var z = 0; z < CURRENT_SIZE; z++) {
       		str += currentState[i][z];
    		}
    		str+= "\n";
@@ -298,26 +381,26 @@ function generateRandomBoolean() {
 }
 
 
-function buildGrid(x, y) {
+function buildGrid(size) {
 
-	var html = '<table id="main-grid">';
+	var html = '<table id="main-grid" cellspacing= "1px">';
     var i;
 
     //instantiate currentState grid
-    for (i = 0; i < y; i++) {
+    for (i = 0; i < size; i++) {
     	var j;
     	var thisRow = [];
-    	for (j = 0; j < x; j++) {
+    	for (j = 0; j < size; j++) {
     		thisRow.push(0);
     	}
     	currentState.push(thisRow);
     }
 
 
-	for (i = 0; i < y; i++) {
+	for (i = 0; i < size; i++) {
 		html += '<tr>';
 		var j;
-		for (j = 0; j < x; j++) {
+		for (j = 0; j < size; j++) {
   			html += '<td class="square dead" id="'+i+'-'+j+'"></td>';
 		}
 		html += '</tr>';

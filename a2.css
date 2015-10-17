@@ -6,10 +6,10 @@
 }
 
 button {
-	height: 75px;
-	min-width: 150px;
+	height: 30px;
+	min-width: 40px;
 	text-align: center;
-	font-size: 30px;
+	font-size: 12px;
 }
 
 #bottom-div {
@@ -17,20 +17,28 @@ button {
 	text-align: center;
 }
 
-.square {
-
+input[type=text] {
+	width: 25px;
 	border: 1px solid black;
+}
+
+.square {
+	border: 1px solid gray;
 }
 
 #main-grid {
 	margin: 0 auto;
 	-moz-user-select: -moz-none;
-	width: 1000px;
-	height: 1000px;
+	width: 500px;
+	height: 500px;
+}
+
+#time-slider-val {
+	background-color: #E6E6E6;
 }
 
 .alive {
-	background-color:gray;
+	background-color:black;
 }
 
 .has-been.dead {
